@@ -1,4 +1,4 @@
 # qunity-core
 
-## An entity-component framework
+## An game engine base on qunity-core
 
