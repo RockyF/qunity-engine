@@ -1,0 +1,14 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "test1": "rollup test1.ts -c -o test1.js -n test1",
+    "test2": "rollup test2.ts -c -o test2.js -n test2"
+  },
+  "devDependencies": {
+    "rollup-plugin-typescript": "^1.0.1",
+    "rollup-plugin-node-resolve": "^4.0.1"
+  }
+}

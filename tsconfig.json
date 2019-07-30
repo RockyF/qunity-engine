@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"target": "es5",
+		"outDir": "dist",
+		"experimentalDecorators": true,
+		"sourceMap": true,
+		"declarationDir": "types",
+		"declaration": true,
+		"lib": [
+			"es5",
+			"es6",
+			"dom"
+		]
+	},
+	"include": [
+		"src"
+	],
+	"typedocOptions": {
+		"mode": "modules",
+		"module": "CommonJS",
+		"out": "docs",
+		"theme": "minimal"
+	}
+}
