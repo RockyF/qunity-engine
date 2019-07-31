@@ -3,6 +3,42 @@
     factory();
 }(function () { 'use strict';
 
+    /*! *****************************************************************************
+    Copyright (c) Microsoft Corporation. All rights reserved.
+    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+    this file except in compliance with the License. You may obtain a copy of the
+    License at http://www.apache.org/licenses/LICENSE-2.0
+
+    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+    MERCHANTABLITY OR NON-INFRINGEMENT.
+
+    See the Apache Version 2.0 License for specific language governing permissions
+    and limitations under the License.
+    ***************************************************************************** */
+    /* global Reflect, Promise */
+
+    var extendStatics = function(d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+
+    function __extends(d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    }
+
+    function __decorate(decorators, target, key, desc) {
+        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+        return c > 3 && r && Object.defineProperty(target, key, r), r;
+    }
+
     /**
      * Created by rockyl on 2018/11/5.
      */
@@ -43,15 +79,15 @@
     ***************************************************************************** */
     /* global Reflect, Promise */
 
-    var extendStatics = function(d, b) {
-        extendStatics = Object.setPrototypeOf ||
+    var extendStatics$1 = function(d, b) {
+        extendStatics$1 = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
             function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics(d, b);
+        return extendStatics$1(d, b);
     };
 
-    function __extends(d, b) {
-        extendStatics(d, b);
+    function __extends$1(d, b) {
+        extendStatics$1(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
@@ -274,7 +310,7 @@
      * 实体类
      */
     var Entity = /** @class */ (function (_super) {
-        __extends(Entity, _super);
+        __extends$1(Entity, _super);
         /**
          * 实例化实体
          * @param name
@@ -533,7 +569,7 @@
      * 根实体类
      */
     var RootEntity = /** @class */ (function (_super) {
-        __extends(RootEntity, _super);
+        __extends$1(RootEntity, _super);
         function RootEntity() {
             var _this = _super !== null && _super.apply(this, arguments) || this;
             _this._isFree = false;
@@ -547,15 +583,15 @@
      * Created by rockyl on 2019-07-28.
      */
     var interactiveMap = [
-        '_dealGlobalTouchBegin',
-        '_dealGlobalTouchMove',
-        '_dealGlobalTouchEnd',
+        'dealGlobalTouchBegin',
+        'dealGlobalTouchMove',
+        'dealGlobalTouchEnd',
     ];
     /**
      * 组件类
      */
     var Component = /** @class */ (function (_super) {
-        __extends(Component, _super);
+        __extends$1(Component, _super);
         function Component() {
             var _this = _super.call(this) || this;
             _this._enabled = true;
@@ -601,6 +637,9 @@
             this._entity = entity;
             this.onSetup();
         };
+        /**
+         * @private
+         */
         Component.prototype.$unsetup = function () {
             this._entity = null;
         };
@@ -639,11 +678,19 @@
          */
         Component.prototype.onSleep = function () {
         };
+        /**
+         * @private
+         * @param t
+         */
         Component.prototype.$onUpdate = function (t) {
             if (this._enabled) {
                 this.onUpdate(t);
             }
         };
+        /**
+         * @private
+         * @param t
+         */
         Component.prototype.$afterUpdate = function (t) {
             if (this._enabled) {
                 this.afterUpdate(t);
@@ -673,19 +720,31 @@
          */
         Component.prototype.onInteract = function (type, event) {
             try {
-                return this[interactiveMap[type]](event);
+                return this['$' + interactiveMap[type]](event);
             }
             catch (e) {
                 console.warn(e);
             }
         };
-        Component.prototype._dealGlobalTouchBegin = function (e) {
+        /**
+         * @private
+         * @param e
+         */
+        Component.prototype.$dealGlobalTouchBegin = function (e) {
             return this.onGlobalTouchBegin(e);
         };
-        Component.prototype._dealGlobalTouchMove = function (e) {
+        /**
+         * @private
+         * @param e
+         */
+        Component.prototype.$dealGlobalTouchMove = function (e) {
             return this.onGlobalTouchMove(e);
         };
-        Component.prototype._dealGlobalTouchEnd = function (e) {
+        /**
+         * @private
+         * @param e
+         */
+        Component.prototype.$dealGlobalTouchEnd = function (e) {
             return this.onGlobalTouchEnd(e);
         };
         /**
@@ -971,28 +1030,6 @@
         };
         return InteractContext;
     }());
-
-    /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-    this file except in compliance with the License. You may obtain a copy of the
-    License at http://www.apache.org/licenses/LICENSE-2.0
-
-    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-    MERCHANTABLITY OR NON-INFRINGEMENT.
-
-    See the Apache Version 2.0 License for specific language governing permissions
-    and limitations under the License.
-    ***************************************************************************** */
-
-    function __decorate(decorators, target, key, desc) {
-        var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-        if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-        else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-        return c > 3 && r && Object.defineProperty(target, key, r), r;
-    }
 
     var ScaleMode;
     (function (ScaleMode) {
@@ -1445,7 +1482,17 @@
     var engine = new QunityEngine();
     engine.setup({});
     var root = engine.root;
-    var comp = new Component();
+    var TestComponent1 = (function (_super) {
+        __extends(TestComponent1, _super);
+        function TestComponent1() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        TestComponent1.prototype.onUpdate = function (t) {
+            console.log(t);
+        };
+        return TestComponent1;
+    }(Component));
+    var comp = new TestComponent1();
     root.components.add(comp);
     engine.start();
 

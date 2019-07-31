@@ -3,7 +3,7 @@
  */
 
 import {Entity, Component} from "qunity-core";
-import {QunityEngine} from "../src/QunityEngine";
+import {QunityEngine} from "../../src/QunityEngine";
 
 let entity1 = new Entity('entity1');
 let entity2 = new Entity('entity2');
@@ -17,15 +17,19 @@ entity3.enabled = true;
 //entity2.addChild(entity3);
 
 let engine = new QunityEngine();
-engine.setup({
-
-});
+engine.setup({});
 
 let root = engine.root;
 
 //root.addChild(entity1);
 
-let comp = new Component();
+class TestComponent extends Component {
+	onUpdate(t: number): void {
+		console.log(t);
+	}
+}
+
+let comp = new TestComponent();
 root.components.add(comp);
 
 engine.start();

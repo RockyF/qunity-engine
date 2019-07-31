@@ -3,15 +3,16 @@
  */
 
 const typescript = require('rollup-plugin-typescript');
+const resolve = require('rollup-plugin-node-resolve');
 const {uglify} = require('rollup-plugin-uglify');
 
-const name = 'qunity-core';
+const name = 'qunity-engine';
 
 export default {
 	input: 'src/index.ts',
 	output: [
 		{
-			file: `dist/index.cjs.js`,
+			file: `dist/index.js`,
 			format: 'cjs',
 		},
 		{
@@ -19,15 +20,19 @@ export default {
 			format: 'es',
 		},
 		{
-			file: `dist/index.js`,
+			file: `dist/index.umd.js`,
 			format: 'umd',
 			name,
 		}
 	],
 	plugins: [
+		resolve({
+			browser: true,
+		}),
 		typescript({
 			typescript: require('typescript'),
 		}),
 		//uglify({}),
-	]
+	],
+	//external: ['qunity-core']
 };

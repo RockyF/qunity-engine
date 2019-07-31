@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test1": "rollup test1.ts -c -o test1.js -n test1",
-    "test2": "rollup test2.ts -c -o test2.js -n test2"
+    "test1": "rollup src/test1.ts -c -o src/test1.js -n test1",
+    "Graphics": "rollup src/Graphics.ts -c -o src/Graphics.js -n Graphics"
   },
   "devDependencies": {
     "rollup-plugin-typescript": "^1.0.1",

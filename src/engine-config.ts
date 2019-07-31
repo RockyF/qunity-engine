@@ -4,7 +4,7 @@
  * 引擎配置
  */
 
-import {injectProp} from "qunity-core/dist2/src/utils";
+import {injectProp} from "./utils";
 
 /**
  * 针对引擎的配置

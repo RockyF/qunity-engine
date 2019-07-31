@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
 		"target": "es5",
-		"outDir": "dist",
+		"outDir": "dist-distributed",
 		"experimentalDecorators": true,
 		"sourceMap": true,
 		"declarationDir": "types",

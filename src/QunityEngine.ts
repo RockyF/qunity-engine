@@ -16,6 +16,7 @@ interface EngineConfig {
 	designHeight?: number,
 	scaleMode?: ScaleMode
 	touchEnabled?: boolean,
+	modifyCanvasSize?: boolean,
 }
 
 /**
@@ -278,7 +279,7 @@ export class QunityEngine {
 		this._renderContext.clear();
 		this.lastFPS = Math.floor(1000 / (tsNow - this.tsLast));
 		this.tsLast = tsNow;
-		const ts = tsNow - this.tsStart;
+		const ts = Math.floor(tsNow - this.tsStart);
 		traverse(this._root, function (child) {
 			if (!child.isFree && child.enabled) {
 				child.components.onUpdate(ts);

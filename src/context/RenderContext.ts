@@ -4,8 +4,8 @@
  * 渲染上下文
  */
 
-import {dirtyFieldTrigger} from "qunity-core";
 import {QunityEngine} from "../QunityEngine";
+import {dirtyFieldTrigger} from "../decorators";
 
 /**
  * 缩放模式
@@ -58,7 +58,7 @@ interface RenderContextOption {
  */
 export default class RenderContext {
 	protected canvas: HTMLCanvasElement;
-	protected canvasContext;
+	protected canvasContext: CanvasRenderingContext2D;
 
 	protected stageWidth: number;
 	protected stageHeight: number;
