@@ -9,6 +9,7 @@ import RenderContext, {ScaleMode} from "./context/RenderContext";
 import './requestAnimationFrame-polyfill';
 import {Entity, RootEntity, traverse, traversePostorder} from "qunity-core";
 import {injectProp} from "./utils";
+import {QComponent} from "./QComponent";
 
 interface EngineConfig {
 	canvas?: string | HTMLCanvasElement,
@@ -311,7 +312,7 @@ export class QunityEngine {
 	 */
 	private onTouchBegin(event) {
 		traversePostorder(this._root, function (child) {
-			return child.components.onInteract(0, event);
+			return onInteract(child, 0, event);
 		})
 	}
 
@@ -321,7 +322,7 @@ export class QunityEngine {
 	 */
 	private onTouchMove(event) {
 		traversePostorder(this._root, function (child) {
-			return child.components.onInteract(1, event);
+			return onInteract(child, 1, event);
 		})
 	}
 
@@ -331,7 +332,31 @@ export class QunityEngine {
 	 */
 	private onTouchEnd(event) {
 		traversePostorder(this._root, function (child) {
-			return child.components.onInteract(2, event);
+			return onInteract(child, 2, event);
 		})
+	}
+}
+
+/**
+ * 当交互时
+ * @param entity
+ * @param type
+ * @param event
+ */
+function onInteract(entity: Entity, type, event) {
+	if (entity.isActive) {
+		let interrupt = false;
+		entity.components.eachComponent((component: QComponent) => {
+			if (component.enabled && component.interactive) {
+				const r = component.onInteract(type, event);
+				if (r) {
+					interrupt = true;
+				}
+				return false;
+			}
+		});
+		return interrupt;
+	} else {
+		return false;
 	}
 }
