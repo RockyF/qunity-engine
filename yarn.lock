@@ -140,7 +140,7 @@ process-nextick-args@~2.0.0:
 
 "qunity-core@https://github.com/RockyF/qunity-core.git":
   version "1.0.0"
-  resolved "https://github.com/RockyF/qunity-core.git#423356bf5c3a7ddd72aabeefd60fe7a8f3ad0141"
+  resolved "https://github.com/RockyF/qunity-core.git#9e90bdd830479c6f0e23e57e0a345607527b0b2d"
 
 readable-stream@^2.0.1:
   version "2.3.6"

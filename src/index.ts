@@ -4,7 +4,7 @@
  
 export * from './QunityEngine'
 export * from './engine-config'
-export * from './Matrix'
 
 export * from './utils'
 export * from './decorators'
+export * from './support'

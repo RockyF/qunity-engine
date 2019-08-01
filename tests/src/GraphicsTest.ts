@@ -2,17 +2,15 @@
  * Created by rockyl on 2019-07-29.
  */
 
-import {Entity, Component} from "qunity-core";
-import {Matrix, QunityEngine} from "../../src";
-
-let engine = new QunityEngine();
-engine.setup({});
+import {Component} from "qunity-core";
+import {Matrix,} from "../../src";
+import {engine} from "./engine";
 
 let root = engine.root;
 
 let ctx = engine.renderContext.context;
 
-class Graphics extends Component {
+class GraphicsTest extends Component {
 	private _matrix = new Matrix();
 
 	onAwake(): void {
@@ -34,7 +32,7 @@ class Graphics extends Component {
 	}
 }
 
-let comp = new Graphics();
+let comp = new GraphicsTest();
 root.components.add(comp);
 
 engine.start();

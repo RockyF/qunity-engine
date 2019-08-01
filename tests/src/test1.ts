@@ -3,7 +3,7 @@
  */
 
 import {Entity, Component} from "qunity-core";
-import {QunityEngine} from "../../src/QunityEngine";
+import {engine} from "./engine";
 
 let entity1 = new Entity('entity1');
 let entity2 = new Entity('entity2');
@@ -15,9 +15,6 @@ entity3.enabled = true;
 
 //entity1.addChild(entity2);
 //entity2.addChild(entity3);
-
-let engine = new QunityEngine();
-engine.setup({});
 
 let root = engine.root;
 

@@ -7,7 +7,8 @@
 import InteractContext from "./context/InteractContext";
 import RenderContext, {ScaleMode} from "./context/RenderContext";
 import './requestAnimationFrame-polyfill';
-import {Entity, injectProp, RootEntity, traverse, traversePostorder} from "qunity-core";
+import {Entity, RootEntity, traverse, traversePostorder} from "qunity-core";
+import {injectProp} from "./utils";
 
 interface EngineConfig {
 	canvas?: string | HTMLCanvasElement,

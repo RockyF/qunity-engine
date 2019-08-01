@@ -8,8 +8,6 @@ let PI = Math.PI;
 let TwoPI = PI * 2;
 let DEG_TO_RAD = PI / 180;
 
-let matrixPool = [];
-
 /**
  * Matrix 类表示一个转换矩阵，它确定如何将点从一个坐标空间映射到另一个坐标空间。
  * 您可以对一个显示对象执行不同的图形转换，方法是设置 Matrix 对象的属性，将该 Matrix
@@ -22,28 +20,6 @@ export class Matrix {
 	d;
 	tx;
 	ty;
-
-	/**
-	 * 释放一个Matrix实例到对象池
-	 * @param matrix 需要回收的 matrix
-	 */
-	static release(matrix) {
-		if (!matrix) {
-			return;
-		}
-		matrixPool.push(matrix);
-	}
-
-	/**
-	 * 从对象池中取出或创建一个新的Matrix对象。
-	 */
-	static create() {
-		let matrix = matrixPool.pop();
-		if (!matrix) {
-			matrix = new Matrix();
-		}
-		return matrix;
-	}
 
 	/**
 	 * 使用指定参数创建一个 Matrix 对象
@@ -67,9 +43,7 @@ export class Matrix {
 	 * 返回一个新的 Matrix 对象，它是此矩阵的克隆，带有与所含对象完全相同的副本。
 	 */
 	clone() {
-		const m = Matrix.create();
-		m.setTo(this.a, this.b, this.c, this.d, this.tx, this.ty)
-		return m
+		return new Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty);
 	}
 
 	/**

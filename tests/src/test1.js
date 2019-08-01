@@ -1,7 +1,8 @@
-(function (factory) {
-    typeof define === 'function' && define.amd ? define(factory) :
-    factory();
-}(function () { 'use strict';
+(function (global, factory) {
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('qunity-core')) :
+    typeof define === 'function' && define.amd ? define(['qunity-core'], factory) :
+    (global = global || self, factory(global['qunity-core']));
+}(this, function (qunityCore) { 'use strict';
 
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation. All rights reserved.
@@ -38,885 +39,6 @@
         else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
         return c > 3 && r && Object.defineProperty(target, key, r), r;
     }
-
-    /**
-     * Created by rockyl on 2018/11/5.
-     */
-    var HASH_CODE_INK = 0;
-    function getHashCode() {
-        return ++HASH_CODE_INK;
-    }
-    /**
-     * 哈希对象
-     */
-    var HashObject = /** @class */ (function () {
-        function HashObject() {
-            this._hashCode = getHashCode();
-        }
-        Object.defineProperty(HashObject.prototype, "hashCode", {
-            get: function () {
-                return this._hashCode;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return HashObject;
-    }());
-
-    /*! *****************************************************************************
-    Copyright (c) Microsoft Corporation. All rights reserved.
-    Licensed under the Apache License, Version 2.0 (the "License"); you may not use
-    this file except in compliance with the License. You may obtain a copy of the
-    License at http://www.apache.org/licenses/LICENSE-2.0
-
-    THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-    KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
-    WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
-    MERCHANTABLITY OR NON-INFRINGEMENT.
-
-    See the Apache Version 2.0 License for specific language governing permissions
-    and limitations under the License.
-    ***************************************************************************** */
-    /* global Reflect, Promise */
-
-    var extendStatics$1 = function(d, b) {
-        extendStatics$1 = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-        return extendStatics$1(d, b);
-    };
-
-    function __extends$1(d, b) {
-        extendStatics$1(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    }
-
-    /**
-     * Created by rockyl on 2019-07-29.
-     */
-    /**
-     * 组件管理类
-     */
-    var ComponentManager = /** @class */ (function () {
-        function ComponentManager(entity) {
-            this._components = [];
-            this._entity = entity;
-            this.eachComponent(function (component) {
-                component.$setup(entity);
-            });
-        }
-        /**
-         * 遍历组件
-         * @param callback
-         */
-        ComponentManager.prototype.eachComponent = function (callback) {
-            this._components.some(callback);
-        };
-        /**
-         * 当被创建时
-         */
-        ComponentManager.prototype.onSetup = function () {
-            this.eachComponent(function (component) {
-                component.onSetup();
-            });
-        };
-        /**
-         * 当生效时
-         */
-        ComponentManager.prototype.onAwake = function () {
-            this.eachComponent(function (component) {
-                component.onAwake();
-            });
-        };
-        /**
-         * 当失效时
-         */
-        ComponentManager.prototype.onSleep = function () {
-            this.eachComponent(function (component) {
-                component.onSleep();
-            });
-        };
-        /**
-         * 时钟更新
-         * @param t
-         */
-        ComponentManager.prototype.onUpdate = function (t) {
-            this.eachComponent(function (component) {
-                component.$onUpdate(t);
-            });
-        };
-        /**
-         * 时钟更新回溯
-         * @param t
-         */
-        ComponentManager.prototype.afterUpdate = function (t) {
-            this.eachComponent(function (component) {
-                component.$afterUpdate(t);
-            });
-        };
-        /**
-         * 当交互时
-         * @param type
-         * @param event
-         */
-        ComponentManager.prototype.onInteract = function (type, event) {
-            if (this._entity.isActive) {
-                var interrupt_1 = false;
-                this.eachComponent(function (comp) {
-                    if (comp.enabled && comp.interactive) {
-                        var r = comp.onInteract(type, event);
-                        if (r) {
-                            interrupt_1 = true;
-                        }
-                        return false;
-                    }
-                });
-                return interrupt_1;
-            }
-            else {
-                return false;
-            }
-        };
-        /**
-         * 当被销毁时
-         */
-        ComponentManager.prototype.onDestroy = function () {
-        };
-        /**
-         * 增加组件
-         * @param component
-         * @param index
-         */
-        ComponentManager.prototype.add = function (component, index) {
-            if (component.entity && component.entity !== this._entity) {
-                console.warn('component.entity was not empty');
-                return;
-            }
-            if (index == undefined || index < 0 || index >= this._components.length) {
-                index = this._components.length;
-            }
-            if (component.entity == this._entity) {
-                index--;
-            }
-            var currentIndex = this._components.indexOf(component);
-            if (currentIndex == index) {
-                return;
-            }
-            if (currentIndex >= 0) {
-                this._components.splice(currentIndex, 1);
-            }
-            this._components.splice(index, 0, component);
-            if (currentIndex < 0) {
-                this.onAddComponent(component);
-            }
-        };
-        /**
-         * 移除组件
-         * @param component
-         */
-        ComponentManager.prototype.remove = function (component) {
-            this.onRemoveComponent(component);
-            var index = this._components.indexOf(component);
-            if (index >= 0) {
-                this._components.splice(index, 1);
-            }
-        };
-        /**
-         * 移除所有组件
-         */
-        ComponentManager.prototype.removeAll = function () {
-            while (this._components.length > 0) {
-                this.remove(this._components[0]);
-            }
-        };
-        /**
-         * 根据组件名称获取指定类的组件列表
-         * @param name
-         */
-        ComponentManager.prototype.findByName = function (name) {
-            var components = this._componentsNameMapping[name];
-            if (!components) {
-                components = this._componentsNameMapping[name] = this._components.filter(function (component) {
-                    return component.constructor['__class__'] === name;
-                });
-            }
-            return components;
-        };
-        /**
-         * 获取指定类的组件列表
-         * @param clazz
-         */
-        ComponentManager.prototype.find = function (clazz) {
-            var components = this._componentsDefMapping[clazz.name];
-            if (!components) {
-                components = this._componentsDefMapping[clazz.name] = this._components.filter(function (component) {
-                    return component instanceof clazz;
-                });
-            }
-            return components;
-        };
-        /**
-         * 获取指定类的组件
-         * @param name
-         */
-        ComponentManager.prototype.getByName = function (name) {
-            return this.findByName(name)[0];
-        };
-        /**
-         * 获取指定类的组件
-         * @param clazz
-         */
-        ComponentManager.prototype.getOne = function (clazz) {
-            return this.find(clazz)[0];
-        };
-        Object.defineProperty(ComponentManager.prototype, "all", {
-            /**
-             * 获取所有组件
-             */
-            get: function () {
-                return this._components;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 当添加组件时
-         * @param component
-         */
-        ComponentManager.prototype.onAddComponent = function (component) {
-            this._componentsNameMapping = {};
-            this._componentsDefMapping = {};
-            component.$setup(this._entity);
-            this.onAwake();
-        };
-        /**
-         * 当移除组件时
-         * @param component
-         */
-        ComponentManager.prototype.onRemoveComponent = function (component) {
-            this._componentsNameMapping = {};
-            this._componentsDefMapping = {};
-            component.$unsetup();
-            this.onSleep();
-        };
-        return ComponentManager;
-    }());
-
-    /**
-     * Created by rockyl on 2019-07-28.
-     */
-    /**
-     * 实体类
-     */
-    var Entity = /** @class */ (function (_super) {
-        __extends$1(Entity, _super);
-        /**
-         * 实例化实体
-         * @param name
-         */
-        function Entity(name) {
-            var _this = _super.call(this) || this;
-            _this._children = [];
-            _this._enabled = false;
-            _this._isFree = true;
-            if (name) {
-                _this.name = name;
-            }
-            _this._components = new ComponentManager(_this);
-            return _this;
-        }
-        Object.defineProperty(Entity.prototype, "children", {
-            /**
-             * 所有子实体
-             */
-            get: function () {
-                return this._children;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Entity.prototype, "parent", {
-            /**
-             * 父实体
-             */
-            get: function () {
-                return this._parent;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Entity.prototype, "isFree", {
-            /**
-             * 是否游离态
-             */
-            get: function () {
-                return this._isFree;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Entity.prototype, "isActive", {
-            get: function () {
-                return !this._isFree && this._enabled;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Entity.prototype, "components", {
-            /**
-             * 获取组件管理实例
-             */
-            get: function () {
-                return this._components;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Entity.prototype, "enabled", {
-            /**
-             * 是否有效
-             */
-            get: function () {
-                return this._enabled;
-            },
-            set: function (value) {
-                if (this._enabled != value) {
-                    this._enabled = value;
-                    if (!this._isFree) {
-                        if (this._enabled) {
-                            this.validate();
-                        }
-                        else {
-                            this.invalidate(true);
-                        }
-                    }
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * 增加子实体
-         * @param child
-         * @param index
-         */
-        Entity.prototype.addChild = function (child, index) {
-            if (index == undefined || index < 0 || index >= this._children.length) {
-                index = this._children.length;
-            }
-            if (child._parent == this) {
-                index--;
-            }
-            this.doAddChild(child, index);
-        };
-        /**
-         * 移除子实体
-         * @param child
-         */
-        Entity.prototype.removeChild = function (child) {
-            if (this.containsChild(child)) {
-                child._parent = null;
-                var index = this.getChildIndex(child);
-                this._children.splice(index, 1);
-                if (!this._isFree) {
-                    child._free();
-                    if (this._enabled) {
-                        child.invalidate();
-                    }
-                }
-                this.onRemoveChild(child);
-            }
-        };
-        /**
-         * 通过索引移除实体
-         * @param index
-         */
-        Entity.prototype.removeChildAt = function (index) {
-            var child = this.getChildAt(index);
-            if (child) {
-                this.removeChild(child);
-            }
-        };
-        /**
-         * 获取实体
-         * @param index
-         */
-        Entity.prototype.getChildAt = function (index) {
-            return this._children[index];
-        };
-        /**
-         * 获取子实体的索引
-         * @param child
-         */
-        Entity.prototype.getChildIndex = function (child) {
-            return this._children.indexOf(child);
-        };
-        /**
-         * 是否包含子实体
-         * @param child
-         */
-        Entity.prototype.containsChild = function (child) {
-            return child.parent == this;
-        };
-        /**
-         * 遍历子实体
-         * @param callback
-         */
-        Entity.prototype.eachChild = function (callback) {
-            this._children.some(callback);
-        };
-        Entity.prototype.doAddChild = function (child, index) {
-            if (child == this) {
-                return;
-            }
-            var parent = child.parent;
-            if (parent) {
-                if (parent == this) {
-                    var currentIndex = this.getChildIndex(child);
-                    if (currentIndex != index) {
-                        this._children.splice(currentIndex, 1);
-                        this._children.splice(index, 0, child);
-                    }
-                }
-                else {
-                    parent.removeChild(child);
-                }
-            }
-            if (!child.parent) {
-                child._parent = this;
-                this._children.splice(index, 0, child);
-                if (!this._isFree) {
-                    child._restrict();
-                    if (this._enabled) {
-                        child.validate();
-                    }
-                }
-                this.onAddChild(child);
-            }
-        };
-        /**
-         * 使生效
-         */
-        Entity.prototype.validate = function (force) {
-            if (force === void 0) { force = false; }
-            if (force || this._enabled) {
-                this.onEnable();
-                this.eachChild(function (child) {
-                    child.validate();
-                });
-            }
-        };
-        /**
-         * 使失效
-         */
-        Entity.prototype.invalidate = function (force) {
-            if (force === void 0) { force = false; }
-            if (force || this._enabled) {
-                this.onDisable();
-                this.eachChild(function (child) {
-                    child.invalidate();
-                });
-            }
-        };
-        /**
-         * 使约束
-         * @private
-         */
-        Entity.prototype._restrict = function () {
-            this._isFree = false;
-            this.eachChild(function (child) {
-                child._restrict();
-            });
-        };
-        /**
-         * 使游离
-         * @param includeSelf
-         */
-        Entity.prototype._free = function (includeSelf) {
-            this._isFree = true;
-            this.eachChild(function (child) {
-                child._free();
-            });
-        };
-        /**
-         * 当实体生效时
-         */
-        Entity.prototype.onEnable = function () {
-            this._components.onAwake();
-        };
-        /**
-         * 当实体失效时
-         */
-        Entity.prototype.onDisable = function () {
-            this._components.onSleep();
-        };
-        /**
-         * 当添加子实体时
-         * @param child
-         */
-        Entity.prototype.onAddChild = function (child) {
-        };
-        /**
-         * 当移除子实体时
-         * @param child
-         */
-        Entity.prototype.onRemoveChild = function (child) {
-        };
-        return Entity;
-    }(HashObject));
-    /**
-     * 根实体类
-     */
-    var RootEntity = /** @class */ (function (_super) {
-        __extends$1(RootEntity, _super);
-        function RootEntity() {
-            var _this = _super !== null && _super.apply(this, arguments) || this;
-            _this._isFree = false;
-            _this._enabled = true;
-            return _this;
-        }
-        return RootEntity;
-    }(Entity));
-
-    /**
-     * Created by rockyl on 2019-07-28.
-     */
-    var interactiveMap = [
-        'dealGlobalTouchBegin',
-        'dealGlobalTouchMove',
-        'dealGlobalTouchEnd',
-    ];
-    /**
-     * 组件类
-     */
-    var Component = /** @class */ (function (_super) {
-        __extends$1(Component, _super);
-        function Component() {
-            var _this = _super.call(this) || this;
-            _this._enabled = true;
-            _this.interactive = false;
-            _this.onCreate();
-            return _this;
-        }
-        Object.defineProperty(Component.prototype, "entity", {
-            get: function () {
-                return this._entity;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(Component.prototype, "enabled", {
-            /**
-             * 是否有效
-             */
-            get: function () {
-                return this._enabled;
-            },
-            set: function (value) {
-                if (this._enabled != value) {
-                    this._enabled = value;
-                    if (this._entity && this._entity.isActive) {
-                        if (value) {
-                            this.onEnable();
-                        }
-                        else {
-                            this.onDisable();
-                        }
-                    }
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-        /**
-         * @private
-         * @param entity
-         */
-        Component.prototype.$setup = function (entity) {
-            this._entity = entity;
-            this.onSetup();
-        };
-        /**
-         * @private
-         */
-        Component.prototype.$unsetup = function () {
-            this._entity = null;
-        };
-        /**
-         * 当被创建时
-         * 类似构造方法
-         */
-        Component.prototype.onCreate = function () {
-        };
-        /**
-         * 当装配完成时
-         *
-         * 编辑器模式会在场景构造和属性注入完成后触发
-         */
-        Component.prototype.onSetup = function () {
-        };
-        /**
-         * 当生效时
-         * 仅当实体唤醒状态
-         */
-        Component.prototype.onEnable = function () {
-        };
-        /**
-         * 当失效时
-         * 仅当实体唤醒状态
-         */
-        Component.prototype.onDisable = function () {
-        };
-        /**
-         * 当实体生效或组件被添加时
-         */
-        Component.prototype.onAwake = function () {
-        };
-        /**
-         * 当实体失效或组件被移除时
-         */
-        Component.prototype.onSleep = function () {
-        };
-        /**
-         * @private
-         * @param t
-         */
-        Component.prototype.$onUpdate = function (t) {
-            if (this._enabled) {
-                this.onUpdate(t);
-            }
-        };
-        /**
-         * @private
-         * @param t
-         */
-        Component.prototype.$afterUpdate = function (t) {
-            if (this._enabled) {
-                this.afterUpdate(t);
-            }
-        };
-        /**
-         * 时钟更新
-         * @param t
-         */
-        Component.prototype.onUpdate = function (t) {
-        };
-        /**
-         * 时钟更新回溯
-         * @param t
-         */
-        Component.prototype.afterUpdate = function (t) {
-        };
-        /**
-         * 当被销毁时
-         */
-        Component.prototype.onDestroy = function () {
-        };
-        /**
-         * 当交互时
-         * @param type
-         * @param event
-         */
-        Component.prototype.onInteract = function (type, event) {
-            try {
-                return this['$' + interactiveMap[type]](event);
-            }
-            catch (e) {
-                console.warn(e);
-            }
-        };
-        /**
-         * @private
-         * @param e
-         */
-        Component.prototype.$dealGlobalTouchBegin = function (e) {
-            return this.onGlobalTouchBegin(e);
-        };
-        /**
-         * @private
-         * @param e
-         */
-        Component.prototype.$dealGlobalTouchMove = function (e) {
-            return this.onGlobalTouchMove(e);
-        };
-        /**
-         * @private
-         * @param e
-         */
-        Component.prototype.$dealGlobalTouchEnd = function (e) {
-            return this.onGlobalTouchEnd(e);
-        };
-        /**
-         * 当全局触摸开始
-         * @param e
-         */
-        Component.prototype.onGlobalTouchBegin = function (e) {
-            return false;
-        };
-        /**
-         * 当全触摸移动
-         * @param e
-         */
-        Component.prototype.onGlobalTouchMove = function (e) {
-            return false;
-        };
-        /**
-         * 当全触摸结束
-         * @param e
-         */
-        Component.prototype.onGlobalTouchEnd = function (e) {
-            return false;
-        };
-        return Component;
-    }(HashObject));
-
-    /**
-     * Created by rockyl on 2019-04-22.
-     *
-     * 实体相关工具
-     */
-    /**
-     * 属性注入方法
-     * @param target 目标对象
-     * @param data 被注入对象
-     * @param callback 自定义注入方法
-     * @param ignoreMethod 是否忽略方法
-     * @param ignoreNull 是否忽略Null字段
-     *
-     * @return 是否有字段注入
-     */
-    function injectProp(target, data, callback, ignoreMethod, ignoreNull) {
-        if (ignoreMethod === void 0) { ignoreMethod = true; }
-        if (ignoreNull === void 0) { ignoreNull = true; }
-        if (!target || !data) {
-            return false;
-        }
-        var result = false;
-        for (var key in data) {
-            var value = data[key];
-            if ((!ignoreMethod || typeof value != 'function') && (!ignoreNull || value != null) && key.indexOf('_') !== 0 && key.indexOf('$') !== 0) {
-                if (callback) {
-                    callback(target, key, value);
-                }
-                else {
-                    try {
-                        target[key] = value;
-                    }
-                    catch (e) {
-                    }
-                }
-                result = true;
-            }
-        }
-        return result;
-    }
-    /**
-     * 实体遍历(先序遍历)
-     * @param target 目标实体`
-     * @param hitChild 遇到子实体回调
-     * @param level 深度，默认全部遍历
-     * @param includeSelf 是否包括自身
-     * @param fullCallback 子实体遍历完后回调
-     * @param params 其他参数
-     */
-    function traverse(target, hitChild, level, includeSelf, fullCallback) {
-        if (level === void 0) { level = -1; }
-        if (includeSelf === void 0) { includeSelf = false; }
-        var params = [];
-        for (var _i = 5; _i < arguments.length; _i++) {
-            params[_i - 5] = arguments[_i];
-        }
-        var interrupt;
-        if (includeSelf) {
-            var ps = [].concat(target, params);
-            hitChild.apply(null, ps);
-        }
-        if (level !== 0) {
-            for (var _a = 0, _b = target.children; _a < _b.length; _a++) {
-                var child = _b[_a];
-                var ps = [].concat(child, params);
-                if (hitChild.apply(null, ps)) {
-                    interrupt = true;
-                    continue;
-                }
-                if (child.children.length > 0) {
-                    ps = [].concat(child, hitChild, level - 1, false, fullCallback, params);
-                    traverse.apply(null, ps);
-                }
-            }
-        }
-        !interrupt && fullCallback && fullCallback(target);
-    }
-    /**
-     * 实体遍历(后序遍历且倒序)
-     * @param target 目标实体
-     * @param hitChild 遇到子实体回调
-     * @param level 深度，默认全部遍历
-     * @param includeSelf 是否包括自身
-     * @param fullCallback 子实体遍历完后回调
-     * @param params 其他参数
-     */
-    function traversePostorder(target, hitChild, level, includeSelf, fullCallback) {
-        if (level === void 0) { level = -1; }
-        if (includeSelf === void 0) { includeSelf = false; }
-        var params = [];
-        for (var _i = 5; _i < arguments.length; _i++) {
-            params[_i - 5] = arguments[_i];
-        }
-        if (level !== 0) {
-            for (var i = target.children.length - 1; i >= 0; i--) {
-                var child = target.children[i];
-                if (!child.enabled) {
-                    continue;
-                }
-                if (traversePostorder.apply(void 0, [child, hitChild, level - 1, false, fullCallback].concat(params))) {
-                    return true;
-                }
-                if (hitChild.apply(void 0, [child].concat(params))) {
-                    return true;
-                }
-            }
-        }
-        if (includeSelf) {
-            hitChild.apply(void 0, [target].concat(params));
-        }
-        fullCallback && fullCallback(target);
-    }
-
-    /**
-     * Created by rockyl on 2018/11/9.
-     *
-     * 装饰器
-     */
-    /**
-     * 属性修改时触发
-     * @param onModify
-     */
-    function fieldChanged(onModify) {
-        return function (target, key) {
-            var privateKey = '_' + key;
-            Object.defineProperty(target, key, {
-                enumerable: true,
-                get: function () {
-                    return this[privateKey];
-                },
-                set: function (v) {
-                    var oldValue = this[privateKey];
-                    if (oldValue !== v) {
-                        this[privateKey] = v;
-                        onModify.apply(this, [v, key, oldValue]);
-                    }
-                }
-            });
-        };
-    }
-    /**
-     * 属性变脏时触发onModify方法
-     */
-    var dirtyFieldTrigger = fieldChanged(function (value, key, oldValue) {
-        this['onModify'] && this['onModify'](value, key, oldValue);
-    });
 
     var ua = navigator.userAgent.toLowerCase();
     var isMobile = (ua.indexOf('mobile') !== -1 || ua.indexOf('android') !== -1);
@@ -1030,6 +152,28 @@
         };
         return InteractContext;
     }());
+
+    function fieldChanged(onModify) {
+        return function (target, key) {
+            var privateKey = '_' + key;
+            Object.defineProperty(target, key, {
+                enumerable: true,
+                get: function () {
+                    return this[privateKey];
+                },
+                set: function (v) {
+                    var oldValue = this[privateKey];
+                    if (oldValue !== v) {
+                        this[privateKey] = v;
+                        onModify.apply(this, [v, key, oldValue]);
+                    }
+                }
+            });
+        };
+    }
+    var dirtyFieldTrigger = fieldChanged(function (value, key, oldValue) {
+        this['onModify'] && this['onModify'](value, key, oldValue);
+    });
 
     var ScaleMode;
     (function (ScaleMode) {
@@ -1269,6 +413,32 @@
         };
     }
 
+    function injectProp(target, data, callback, ignoreMethod, ignoreNull) {
+        if (ignoreMethod === void 0) { ignoreMethod = true; }
+        if (ignoreNull === void 0) { ignoreNull = true; }
+        if (!target || !data) {
+            return false;
+        }
+        var result = false;
+        for (var key in data) {
+            var value = data[key];
+            if ((!ignoreMethod || typeof value != 'function') && (!ignoreNull || value != null) && key.indexOf('_') !== 0 && key.indexOf('$') !== 0) {
+                if (callback) {
+                    callback(target, key, value);
+                }
+                else {
+                    try {
+                        target[key] = value;
+                    }
+                    catch (e) {
+                    }
+                }
+                result = true;
+            }
+        }
+        return result;
+    }
+
     var QunityEngine = (function () {
         function QunityEngine() {
             var _this = this;
@@ -1343,7 +513,7 @@
                 modifyCanvasSize: modifyCanvasSize,
                 onUpdateScale: this.onUpdateScale.bind(this),
             });
-            this._root = new RootEntity();
+            this._root = new qunityCore.RootEntity();
         };
         QunityEngine.prototype.start = function () {
             this._root.enabled = true;
@@ -1433,8 +603,8 @@
             this._renderContext.clear();
             this.lastFPS = Math.floor(1000 / (tsNow - this.tsLast));
             this.tsLast = tsNow;
-            var ts = tsNow - this.tsStart;
-            traverse(this._root, function (child) {
+            var ts = Math.floor(tsNow - this.tsStart);
+            qunityCore.traverse(this._root, function (child) {
                 if (!child.isFree && child.enabled) {
                     child.components.onUpdate(ts);
                 }
@@ -1456,43 +626,570 @@
             }
         };
         QunityEngine.prototype.onTouchBegin = function (event) {
-            traversePostorder(this._root, function (child) {
+            qunityCore.traversePostorder(this._root, function (child) {
                 return child.components.onInteract(0, event);
             });
         };
         QunityEngine.prototype.onTouchMove = function (event) {
-            traversePostorder(this._root, function (child) {
+            qunityCore.traversePostorder(this._root, function (child) {
                 return child.components.onInteract(1, event);
             });
         };
         QunityEngine.prototype.onTouchEnd = function (event) {
-            traversePostorder(this._root, function (child) {
+            qunityCore.traversePostorder(this._root, function (child) {
                 return child.components.onInteract(2, event);
             });
         };
         return QunityEngine;
     }());
 
-    var entity1 = new Entity('entity1');
-    var entity2 = new Entity('entity2');
-    var entity3 = new Entity('entity3');
+    var Vector2D = (function (_super) {
+        __extends(Vector2D, _super);
+        function Vector2D(x, y, onChange) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            var _this = _super.call(this) || this;
+            _this.onChange = onChange;
+            _this.setXY(x, y);
+            return _this;
+        }
+        Vector2D.prototype.onModify = function (value, key, oldValue) {
+            this.onChange && this.onChange(value, key, oldValue);
+        };
+        Vector2D.prototype.setXY = function (x, y) {
+            if (x === void 0) { x = 0; }
+            if (y === void 0) { y = 0; }
+            this.x = x;
+            this.y = y;
+            return this;
+        };
+        Vector2D.prototype.copyFrom = function (v2) {
+            this.x = v2.x;
+            this.y = v2.y;
+            return this;
+        };
+        Vector2D.prototype.clone = function () {
+            return new Vector2D(this.x, this.y);
+        };
+        Vector2D.prototype.zero = function () {
+            this.x = 0;
+            this.y = 0;
+            return this;
+        };
+        Object.defineProperty(Vector2D.prototype, "isZero", {
+            get: function () {
+                return this.x == 0 && this.y == 0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Vector2D.prototype.normalize = function () {
+            var len = this.length;
+            if (len == 0) {
+                this.x = 1;
+                return this;
+            }
+            this.x /= len;
+            this.y /= len;
+            return this;
+        };
+        Object.defineProperty(Vector2D.prototype, "isNormalized", {
+            get: function () {
+                return this.length == 1.0;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Vector2D.prototype.truncate = function (max) {
+            this.length = Math.min(max, this.length);
+            return this;
+        };
+        Vector2D.prototype.reverse = function () {
+            this.x = -this.x;
+            this.y = -this.y;
+            return this;
+        };
+        Vector2D.prototype.dotProd = function (v2) {
+            return this.x * v2.x + this.y * v2.y;
+        };
+        Vector2D.prototype.crossProd = function (v2) {
+            return this.x * v2.y - this.y * v2.x;
+        };
+        Vector2D.prototype.distSQ = function (v2) {
+            var dx = v2.x - this.x;
+            var dy = v2.y - this.y;
+            return dx * dx + dy * dy;
+        };
+        Vector2D.prototype.distance = function (v2) {
+            return Math.sqrt(this.distSQ(v2));
+        };
+        Vector2D.prototype.add = function (v2) {
+            this.x += v2.x;
+            this.y += v2.y;
+            return this;
+        };
+        Vector2D.prototype.subtract = function (v2) {
+            this.x -= v2.x;
+            this.y -= v2.y;
+            return this;
+        };
+        Vector2D.prototype.multiply = function (value) {
+            this.x *= value;
+            this.y *= value;
+            return this;
+        };
+        Vector2D.prototype.divide = function (value) {
+            this.x /= value;
+            this.y /= value;
+            return this;
+        };
+        Object.defineProperty(Vector2D.prototype, "angle", {
+            get: function () {
+                return this.radian * 180 / Math.PI;
+            },
+            set: function (value) {
+                this.radian = value * Math.PI / 180;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector2D.prototype, "radian", {
+            get: function () {
+                return Math.atan2(this.y, this.x);
+            },
+            set: function (value) {
+                var len = this.length;
+                this.setXY(Math.cos(value) * len, Math.sin(value) * len);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Vector2D.prototype.equals = function (v2) {
+            return this.x == v2.x && this.y == v2.y;
+        };
+        Object.defineProperty(Vector2D.prototype, "length", {
+            get: function () {
+                return Math.sqrt(this.lengthSQ);
+            },
+            set: function (value) {
+                var a = this.radian;
+                this.setXY(Math.cos(a) * value, Math.sin(a) * value);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector2D.prototype, "lengthSQ", {
+            get: function () {
+                return this.x * this.x + this.y * this.y;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Object.defineProperty(Vector2D.prototype, "slope", {
+            get: function () {
+                return this.y / this.x;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Vector2D.prototype.toString = function () {
+            return "[Vector2D (x:" + this.x + ", y:" + this.y + ")]";
+        };
+        Vector2D.prototype.toObj = function () {
+            return { x: this.x, y: this.y };
+        };
+        Vector2D.prototype.toArray = function () {
+            return [this.x, this.y];
+        };
+        Vector2D.corner = function (v1, v2) {
+            return Math.acos(v1.dotProd(v2) / (v1.length * v2.length));
+        };
+        __decorate([
+            dirtyFieldTrigger
+        ], Vector2D.prototype, "x", void 0);
+        __decorate([
+            dirtyFieldTrigger
+        ], Vector2D.prototype, "y", void 0);
+        return Vector2D;
+    }(qunityCore.HashObject));
+
+    var PI = Math.PI;
+    var TwoPI = PI * 2;
+    var DEG_TO_RAD = PI / 180;
+    var Matrix = (function () {
+        function Matrix(a, b, c, d, tx, ty) {
+            if (a === void 0) { a = 1; }
+            if (b === void 0) { b = 0; }
+            if (c === void 0) { c = 0; }
+            if (d === void 0) { d = 1; }
+            if (tx === void 0) { tx = 0; }
+            if (ty === void 0) { ty = 0; }
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.tx = tx;
+            this.ty = ty;
+        }
+        Matrix.prototype.clone = function () {
+            return new Matrix(this.a, this.b, this.c, this.d, this.tx, this.ty);
+        };
+        Matrix.prototype.concat = function (other) {
+            var a = this.a * other.a;
+            var b = 0.0;
+            var c = 0.0;
+            var d = this.d * other.d;
+            var tx = this.tx * other.a + other.tx;
+            var ty = this.ty * other.d + other.ty;
+            if (this.b !== 0.0 || this.c !== 0.0 || other.b !== 0.0 || other.c !== 0.0) {
+                a += this.b * other.c;
+                d += this.c * other.b;
+                b += this.a * other.b + this.b * other.d;
+                c += this.c * other.a + this.d * other.c;
+                tx += this.ty * other.c;
+                ty += this.tx * other.b;
+            }
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.tx = tx;
+            this.ty = ty;
+        };
+        Matrix.prototype.copyFrom = function (other) {
+            this.a = other.a;
+            this.b = other.b;
+            this.c = other.c;
+            this.d = other.d;
+            this.tx = other.tx;
+            this.ty = other.ty;
+            return this;
+        };
+        Matrix.prototype.identity = function () {
+            this.a = this.d = 1;
+            this.b = this.c = this.tx = this.ty = 0;
+        };
+        Matrix.prototype.invert = function () {
+            this.$invertInto(this);
+        };
+        Matrix.prototype.$invertInto = function (target) {
+            var a = this.a;
+            var b = this.b;
+            var c = this.c;
+            var d = this.d;
+            var tx = this.tx;
+            var ty = this.ty;
+            if (b == 0 && c == 0) {
+                target.b = target.c = 0;
+                if (a == 0 || d == 0) {
+                    target.a = target.d = target.tx = target.ty = 0;
+                }
+                else {
+                    a = target.a = 1 / a;
+                    d = target.d = 1 / d;
+                    target.tx = -a * tx;
+                    target.ty = -d * ty;
+                }
+                return;
+            }
+            var determinant = a * d - b * c;
+            if (determinant == 0) {
+                target.identity();
+                return;
+            }
+            determinant = 1 / determinant;
+            var k = target.a = d * determinant;
+            b = target.b = -b * determinant;
+            c = target.c = -c * determinant;
+            d = target.d = a * determinant;
+            target.tx = -(k * tx + c * ty);
+            target.ty = -(b * tx + d * ty);
+        };
+        Matrix.prototype.rotate = function (radian) {
+            radian = +radian;
+            if (radian !== 0) {
+                var u = Math.cos(radian);
+                var v = Math.sin(radian);
+                var _a = this, a = _a.a, b = _a.b, c = _a.c, d = _a.d, tx = _a.tx, ty = _a.ty;
+                this.a = a * u - b * v;
+                this.b = a * v + b * u;
+                this.c = c * u - d * v;
+                this.d = c * v + d * u;
+                this.tx = tx * u - ty * v;
+                this.ty = tx * v + ty * u;
+            }
+        };
+        Object.defineProperty(Matrix.prototype, "rotation", {
+            get: function () {
+                return Math.atan2(this.b, this.a);
+            },
+            enumerable: true,
+            configurable: true
+        });
+        Matrix.prototype.scale = function (sx, sy) {
+            if (sx !== 1) {
+                this.a *= sx;
+                this.c *= sx;
+                this.tx *= sx;
+            }
+            if (sy !== 1) {
+                this.b *= sy;
+                this.d *= sy;
+                this.ty *= sy;
+            }
+        };
+        Matrix.prototype.setTo = function (a, b, c, d, tx, ty) {
+            this.a = a;
+            this.b = b;
+            this.c = c;
+            this.d = d;
+            this.tx = tx;
+            this.ty = ty;
+            return this;
+        };
+        Matrix.prototype.transformPoint = function (pointX, pointY, resultPoint) {
+            var _a = this, a = _a.a, b = _a.b, c = _a.c, d = _a.d, tx = _a.tx, ty = _a.ty;
+            var x = a * pointX + c * pointY + tx;
+            var y = b * pointX + d * pointY + ty;
+            if (resultPoint) {
+                resultPoint.x = x;
+                resultPoint.y = y;
+                return resultPoint;
+            }
+            return { x: x, y: y };
+        };
+        Matrix.prototype.deltaTransformPoint = function (pointX, pointY, resultPoint) {
+            var _a = this, a = _a.a, b = _a.b, c = _a.c, d = _a.d;
+            var x = a * pointX + c * pointY;
+            var y = b * pointX + d * pointY;
+            if (resultPoint) {
+                resultPoint.x = x;
+                resultPoint.y = y;
+                return resultPoint;
+            }
+            return { x: x, y: y };
+        };
+        Matrix.prototype.translate = function (dx, dy) {
+            this.tx += dx;
+            this.ty += dy;
+        };
+        Matrix.prototype.equals = function (other) {
+            return this.a == other.a && this.b == other.b &&
+                this.c == other.c && this.d == other.d &&
+                this.tx == other.tx && this.ty == other.ty;
+        };
+        Matrix.prototype.prepend = function (a, b, c, d, tx, ty) {
+            var tx1 = this.tx;
+            if (a != 1 || b != 0 || c != 0 || d != 1) {
+                var a1 = this.a;
+                var c1 = this.c;
+                this.a = a1 * a + this.b * c;
+                this.b = a1 * b + this.b * d;
+                this.c = c1 * a + this.d * c;
+                this.d = c1 * b + this.d * d;
+            }
+            this.tx = tx1 * a + this.ty * c + tx;
+            this.ty = tx1 * b + this.ty * d + ty;
+            return this;
+        };
+        Matrix.prototype.append = function (a, b, c, d, tx, ty) {
+            var a1 = this.a;
+            var b1 = this.b;
+            var c1 = this.c;
+            var d1 = this.d;
+            if (a != 1 || b != 0 || c != 0 || d != 1) {
+                this.a = a * a1 + b * c1;
+                this.b = a * b1 + b * d1;
+                this.c = c * a1 + d * c1;
+                this.d = c * b1 + d * d1;
+            }
+            this.tx = tx * a1 + ty * c1 + this.tx;
+            this.ty = tx * b1 + ty * d1 + this.ty;
+            return this;
+        };
+        Matrix.prototype.toString = function () {
+            return "(a=" + this.a + ", b=" + this.b + ", c=" + this.c + ", d=" + this.d + ", tx=" + this.tx + ", ty=" + this.ty + ")";
+        };
+        Matrix.prototype.createBox = function (scaleX, scaleY, rotation, tx, ty) {
+            if (rotation === void 0) { rotation = 0; }
+            if (tx === void 0) { tx = 0; }
+            if (ty === void 0) { ty = 0; }
+            var self = this;
+            if (rotation !== 0) {
+                rotation = rotation / DEG_TO_RAD;
+                var u = Math.cos(rotation);
+                var v = Math.sin(rotation);
+                self.a = u * scaleX;
+                self.b = v * scaleY;
+                self.c = -v * scaleX;
+                self.d = u * scaleY;
+            }
+            else {
+                self.a = scaleX;
+                self.b = 0;
+                self.c = 0;
+                self.d = scaleY;
+            }
+            self.tx = tx;
+            self.ty = ty;
+        };
+        Matrix.prototype.createGradientBox = function (width, height, rotation, tx, ty) {
+            if (rotation === void 0) { rotation = 0; }
+            if (tx === void 0) { tx = 0; }
+            if (ty === void 0) { ty = 0; }
+            this.createBox(width / 1638.4, height / 1638.4, rotation, tx + width / 2, ty + height / 2);
+        };
+        Matrix.prototype.$transformBounds = function (bounds) {
+            var a = this.a;
+            var b = this.b;
+            var c = this.c;
+            var d = this.d;
+            var tx = this.tx;
+            var ty = this.ty;
+            var x = bounds.x;
+            var y = bounds.y;
+            var xMax = x + bounds.width;
+            var yMax = y + bounds.height;
+            var x0 = a * x + c * y + tx;
+            var y0 = b * x + d * y + ty;
+            var x1 = a * xMax + c * y + tx;
+            var y1 = b * xMax + d * y + ty;
+            var x2 = a * xMax + c * yMax + tx;
+            var y2 = b * xMax + d * yMax + ty;
+            var x3 = a * x + c * yMax + tx;
+            var y3 = b * x + d * yMax + ty;
+            var tmp = 0;
+            if (x0 > x1) {
+                tmp = x0;
+                x0 = x1;
+                x1 = tmp;
+            }
+            if (x2 > x3) {
+                tmp = x2;
+                x2 = x3;
+                x3 = tmp;
+            }
+            bounds.x = Math.floor(x0 < x2 ? x0 : x2);
+            bounds.width = Math.ceil((x1 > x3 ? x1 : x3) - bounds.x);
+            if (y0 > y1) {
+                tmp = y0;
+                y0 = y1;
+                y1 = tmp;
+            }
+            if (y2 > y3) {
+                tmp = y2;
+                y2 = y3;
+                y3 = tmp;
+            }
+            bounds.y = Math.floor(y0 < y2 ? y0 : y2);
+            bounds.height = Math.ceil((y1 > y3 ? y1 : y3) - bounds.y);
+        };
+        Matrix.prototype.getDeterminant = function () {
+            return this.a * this.d - this.b * this.c;
+        };
+        Matrix.prototype.$getScaleX = function () {
+            var m = this;
+            if (m.b == 0) {
+                return m.a;
+            }
+            var result = Math.sqrt(m.a * m.a + m.b * m.b);
+            return this.getDeterminant() < 0 ? -result : result;
+        };
+        Matrix.prototype.$getScaleY = function () {
+            var m = this;
+            if (m.c == 0) {
+                return m.d;
+            }
+            var result = Math.sqrt(m.c * m.c + m.d * m.d);
+            return this.getDeterminant() < 0 ? -result : result;
+        };
+        Matrix.prototype.$getSkewX = function () {
+            if (this.d < 0) {
+                return Math.atan2(this.d, this.c) + (PI / 2);
+            }
+            else {
+                return Math.atan2(this.d, this.c) - (PI / 2);
+            }
+        };
+        Matrix.prototype.$getSkewY = function () {
+            if (this.a < 0) {
+                return Math.atan2(this.b, this.a) - PI;
+            }
+            else {
+                return Math.atan2(this.b, this.a);
+            }
+        };
+        Matrix.prototype.$updateScaleAndRotation = function (scaleX, scaleY, skewX, skewY) {
+            if ((skewX == 0 || skewX == TwoPI) && (skewY == 0 || skewY == TwoPI)) {
+                this.a = scaleX;
+                this.b = this.c = 0;
+                this.d = scaleY;
+                return;
+            }
+            skewX = skewX / DEG_TO_RAD;
+            skewY = skewY / DEG_TO_RAD;
+            var u = Math.cos(skewX);
+            var v = Math.sin(skewX);
+            if (skewX == skewY) {
+                this.a = u * scaleX;
+                this.b = v * scaleX;
+            }
+            else {
+                this.a = Math.cos(skewY) * scaleX;
+                this.b = Math.sin(skewY) * scaleX;
+            }
+            this.c = -v * scaleY;
+            this.d = u * scaleY;
+        };
+        Matrix.prototype.$preMultiplyInto = function (other, target) {
+            var a = other.a * this.a;
+            var b = 0.0;
+            var c = 0.0;
+            var d = other.d * this.d;
+            var tx = other.tx * this.a + this.tx;
+            var ty = other.ty * this.d + this.ty;
+            if (other.b !== 0.0 || other.c !== 0.0 || this.b !== 0.0 || this.c !== 0.0) {
+                a += other.b * this.c;
+                d += other.c * this.b;
+                b += other.a * this.b + other.b * this.d;
+                c += other.c * this.a + other.d * this.c;
+                tx += other.ty * this.c;
+                ty += other.tx * this.b;
+            }
+            target.a = a;
+            target.b = b;
+            target.c = c;
+            target.d = d;
+            target.tx = tx;
+            target.ty = ty;
+        };
+        Matrix.prototype.toArray = function () {
+            return [this.a, this.b, this.c, this.d, this.tx, this.ty];
+        };
+        return Matrix;
+    }());
+
+    var engine = new QunityEngine();
+    engine.setup({});
+
+    var entity1 = new qunityCore.Entity('entity1');
+    var entity2 = new qunityCore.Entity('entity2');
+    var entity3 = new qunityCore.Entity('entity3');
     entity1.enabled = true;
     entity2.enabled = true;
     entity3.enabled = true;
-    var engine = new QunityEngine();
-    engine.setup({});
     var root = engine.root;
-    var TestComponent1 = (function (_super) {
-        __extends(TestComponent1, _super);
-        function TestComponent1() {
+    var TestComponent = (function (_super) {
+        __extends(TestComponent, _super);
+        function TestComponent() {
             return _super !== null && _super.apply(this, arguments) || this;
         }
-        TestComponent1.prototype.onUpdate = function (t) {
+        TestComponent.prototype.onUpdate = function (t) {
             console.log(t);
         };
-        return TestComponent1;
-    }(Component));
-    var comp = new TestComponent1();
+        return TestComponent;
+    }(qunityCore.Component));
+    var comp = new TestComponent();
     root.components.add(comp);
     engine.start();
 

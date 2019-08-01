@@ -9,6 +9,9 @@ export default {
 	output: {
 		format: 'umd',
 		sourcemap: true,
+		globals: {
+			'qunity-core': 'qunity-core'
+		},
 	},
 	plugins: [
 		resolve({
@@ -18,5 +21,6 @@ export default {
 			typescript: require('typescript'),
 			include: ['**/*.ts+(|x)', '../src/**/*.ts+(|x)',]
 		}),
-	]
+	],
+	external: ['qunity-core'],
 };

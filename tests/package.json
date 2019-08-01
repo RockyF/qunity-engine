@@ -5,7 +5,8 @@
   "license": "MIT",
   "scripts": {
     "test1": "rollup src/test1.ts -c -o src/test1.js -n test1",
-    "Graphics": "rollup src/Graphics.ts -c -o src/Graphics.js -n Graphics"
+    "GraphicsTest": "rollup src/GraphicsTest.ts -c -o src/GraphicsTest.js -n GraphicsTest",
+    "ComponentTest": "rollup src/ComponentTest.ts -c -o src/ComponentTest.js -n ComponentTest"
   },
   "devDependencies": {
     "rollup-plugin-typescript": "^1.0.1",
